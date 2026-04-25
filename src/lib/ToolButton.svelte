@@ -10,6 +10,7 @@
          */
         editorState = $bindable(),
     } = $props()
+    $inspect(editorState.selectedTool, tool);
 
     let selected = $derived(editorState.selectedTool === tool)
 </script>

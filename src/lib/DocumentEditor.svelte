@@ -149,9 +149,9 @@
 		<aside class="tools" aria-label="Tools">
 			{#each tools as tool}
 				{#if Array.isArray(tool)}
-					<ToolButton {tool} bind:editorState></ToolButton>
-				{:else}
 					<ToolGroupButton tools={tool} bind:editorState></ToolGroupButton>
+				{:else}
+					<ToolButton {tool} bind:editorState></ToolButton>
 				{/if}
 			{/each}
 		</aside>
