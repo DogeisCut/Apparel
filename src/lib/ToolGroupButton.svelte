@@ -9,8 +9,7 @@
     /**
      * @type {Tool?}
      */
-    // svelte-ignore state_referenced_locally
-    let tool = $state(tools[0] ?? null);
+    let tool = $derived(tools[0] ?? null);
 
     let selected = $derived(tools.includes(editorState.selectedTool))
 </script>
