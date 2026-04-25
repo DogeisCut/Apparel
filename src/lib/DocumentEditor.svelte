@@ -1,40 +1,89 @@
 <script>
 	import { Tool } from "./tools/Tool";
 	import { BoxSelectTool } from "./tools/BoxSelectTool/BoxSelectTool";
-	import toolArrow from "$lib/assets/toolicons/toolArrow.svg";
-	import toolCircle from "$lib/assets/toolicons/toolCircle.svg";
-	import toolSquare from "$lib/assets/toolicons/toolSquare.svg";
-	import toolTriangle from "$lib/assets/toolicons/toolTriangle.svg";
+	
+	import ToolButton from "./ToolButton.svelte";
 
 	/**
 	 * @type {(Tool[] | Tool)[]}
 	 */
-	const tools = [[new BoxSelectTool()]];
-	const flatTools = tools.flat();
-	/** @type {("square" | "triangle" | "circle")[]} */
-	const shapeOptions = ["square", "triangle", "circle"];
-	const shapeIcons = {
-		square: toolSquare,
-		triangle: toolTriangle,
-		circle: toolCircle,
-	};
-	/**
-	 * @type {Tool | "shape" | "pen" | null}
-	 */
-	let currentTool = $state(null);
-	let style = $state({
-		fill: {
-			color: "#734b06",
-		},
-		stroke: {
-			color: "#000000",
-			width: 4,
-		},
-		shape: {
-			opacity: 1,
-			blur: 0,
-		},
-	});
+	const tools = [
+		[
+			new BoxSelectTool(),
+			/*new LassoSelectTool(),*/
+			/*new DiscSelectTool(),*/
+		],
+		[
+			/*new BoxPointSelectTool(),*/
+			/*new LassoPointSelectTool(),*/
+			/*new DiscPointSelectTool(),*/
+		],
+		[
+			/*new BrushTool(),*/
+			/*new PenTool(),*/
+			/*new EraserTool(),*/
+		],
+		/*new PaintBucketTool(),*/
+		/*new TextTool(),*/
+		[
+			/*new LineTool(),*/
+			/*new PolygonTool(),*/
+			/*new RectangleTool(),*/
+			/*new CircleTool(),*/
+			/*new ShapeTool(),*/
+			/*new ArrowTool(),*/
+		],
+		/*new ShapeBuilderTool(),*/
+		[
+			/*new HideTool(),*/
+			/*new LockTool(),*/
+		],
+	];
+	let editorState = $state(
+		{
+			/**
+			 * @type {Tool | null}
+			 */
+			selectedTool: null,
+			style: {
+				fill: {
+					color: "#734b06ff",
+					/**
+					 * @type {"nonzero" | "evenodd"}
+					*/
+					fillRule: "evenodd",
+					opacity: 1, // seperate from color opacity
+				},
+				stroke: {
+					color: "#000000ff",
+					width: 4,
+					/**
+					 * @type {number[]}
+					*/
+					dashArray: [],
+					dashOffset: 0,
+					/**
+					 * @type {"butt" | "round" | "square"}
+					*/
+					lineCap: "round",
+					/**
+					 * @type {"arcs" | "bevel" | "miter" | "miter-clip" | "round"}
+					*/
+					lineJoin: "miter",
+					miterLimit: 4,
+					opacity: 1, // seperate from color opacity
+				},
+				shape: {
+					opacity: 1,
+					blur: 0,
+					/**
+					 * @type {"normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten" | "color-dodge" | "color-burn" | "hard-light" | "soft-light" | "difference" | "exclusion" | "hue" | "saturation" | "color" | "luminosity" }
+					*/
+					blendMode: "normal",
+				},
+			}
+		}
+	);
 	/**
 	 * @type {Node[]}
 	 */
@@ -44,35 +93,6 @@
 	let canvasHost = $state();
 	let zoom = $state(100);
 	let position = $state({ x: 0, y: 0 });
-	/** @type {"square" | "triangle" | "circle"} */
-	let selectedShape = $state("square");
-	let shapeMenuOpen = $state(false);
-
-	/**
-	 * @param {"square" | "triangle" | "circle"} shape
-	 */
-	function selectShape(shape) {
-		selectedShape = shape;
-		currentTool = "shape";
-		shapeMenuOpen = false;
-	}
-
-	/**
-	 * @param {MouseEvent} event
-	 */
-	function handleShapeButtonClick(event) {
-		currentTool = "shape";
-
-		if (
-			event.detail >= 2 ||
-			/** @type {HTMLElement} */ (event.target).closest(".arrow")
-		) {
-			shapeMenuOpen = !shapeMenuOpen;
-			return;
-		}
-
-		shapeMenuOpen = false;
-	}
 
 	$effect(() => {
 		const svg = document.ensureSvgElement();
@@ -93,11 +113,11 @@
 	<div class="settings">
 		<label>
 			Fill
-			<input type="color" bind:value={style.fill.color} />
+			<input type="color" bind:value={editorState.style.fill.color} />
 		</label>
 		<label>
 			Outline
-			<input type="color" bind:value={style.stroke.color} />
+			<input type="color" bind:value={editorState.style.stroke.color} />
 		</label>
 		<label>
 			Width
@@ -105,7 +125,7 @@
 				class="num"
 				type="number"
 				min="0"
-				bind:value={style.stroke.width}
+				bind:value={editorState.style.stroke.width}
 			/>
 		</label>
 		<label>
@@ -116,7 +136,7 @@
 				min="0"
 				max="1"
 				step="0.05"
-				bind:value={style.shape.opacity}
+				bind:value={editorState.style.shape.opacity}
 			/>
 		</label>
 		<span class="sep"></span>
@@ -128,73 +148,9 @@
 
 	<div class="ws">
 		<aside class="tools" aria-label="Tools">
-			{#each flatTools as tool}
-				<button
-					type="button"
-					class:active={currentTool === tool}
-					aria-pressed={currentTool === tool}
-					onclick={() => {
-						currentTool = tool;
-						shapeMenuOpen = false;
-					}}
-				>
-					{tool.name}
-				</button>
+			{#each tools as tool}
+				<ToolButton tools={tool} selected={false} {editorState}></ToolButton>
 			{/each}
-			<div class="shapes">
-				<button
-					type="button"
-					class="sbutton"
-					class:active={currentTool === "shape"}
-					aria-label={`Shape tool: ${selectedShape}`}
-					aria-expanded={shapeMenuOpen}
-					onclick={handleShapeButtonClick}
-				>
-					<img
-						class="sicon"
-						src={shapeIcons[selectedShape]}
-						alt=""
-						aria-hidden="true"
-					/>
-					<img
-						class="arrow"
-						src={toolArrow}
-						alt=""
-						aria-hidden="true"
-					/>
-				</button>
-				{#if shapeMenuOpen}
-					<div class="soptions" aria-label="Shape options">
-						{#each shapeOptions as shape}
-							<button
-								type="button"
-								class="soptions"
-								class:active={selectedShape === shape}
-								aria-label={`Use ${shape}`}
-								onclick={() => selectShape(shape)}
-							>
-								<img
-									class="sicon"
-									src={shapeIcons[shape]}
-									alt=""
-									aria-hidden="true"
-								/>
-							</button>
-						{/each}
-					</div>
-				{/if}
-			</div>
-			<button
-				type="button"
-				class:active={currentTool === "pen"}
-				aria-pressed={currentTool === "pen"}
-				onclick={() => {
-					currentTool = "pen";
-					shapeMenuOpen = false;
-				}}
-			>
-				Pen
-			</button>
 		</aside>
 
 		<div class="cwrap">
@@ -377,80 +333,6 @@
 		padding: 4px;
 		border-right: 1px solid var(--surface-border);
 		background: var(--surface-soft);
-	}
-
-	.tools button {
-		min-height: 48px;
-		padding: 6px;
-		border-color: var(--surface-border);
-		background: var(--surface-white);
-		color: var(--text-strong);
-		font-size: 12px;
-		font-weight: 500;
-	}
-
-	.tools button.active {
-		border-color: var(--toolbar-dark);
-		background: var(--toolbar);
-		color: white;
-	}
-
-	.tools button:hover,
-	.tools .sbutton[aria-expanded="true"] {
-		border-color: var(--toolbar-dark);
-		background: var(--toolbar);
-		color: white;
-	}
-
-	.shapes {
-		position: relative;
-	}
-
-	.tools .sbutton,
-	.tools .soptions {
-		display: grid;
-		place-items: center;
-		width: 100%;
-		min-height: 48px;
-	}
-
-	.tools .sbutton {
-		position: relative;
-	}
-
-	.shapes > .soptions {
-		position: absolute;
-		top: 0;
-		left: calc(100% + 4px);
-		z-index: 2;
-		display: flex;
-		gap: 4px;
-	}
-
-	.tools button.soptions {
-		width: 48px;
-		background: #ffffff;
-	}
-
-	.tools button.soptions.active {
-		border-color: var(--toolbar-dark);
-		background: var(--toolbar);
-	}
-
-	.sicon {
-		display: block;
-		width: 20px;
-		height: 20px;
-		object-fit: contain;
-		pointer-events: none;
-	}
-
-	.arrow {
-		position: absolute;
-		top: 5px;
-		right: 5px;
-		width: 9px;
-		height: 9px;
 	}
 
 	.cwrap {
