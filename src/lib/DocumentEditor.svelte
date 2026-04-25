@@ -1,6 +1,25 @@
 <script>
 	import { Tool } from "./tools/Tool";
-	import { BoxSelectTool } from "./tools/BoxSelectTool/BoxSelectTool";
+	import { BoxSelectTool } from "./tools/BoxSelectTool";
+	import { LassoSelectTool } from "./tools/LassoSelectTool";
+	import { DiscSelectTool } from "./tools/DiscSelectTool";
+	import { BoxReshapeTool } from "./tools/BoxReshapeTool";
+	import { LassoReshapeTool } from "./tools/LassoReshapeTool";
+	import { DiscReshapeTool } from "./tools/DiscReshapeTool";
+	import { BrushTool } from "./tools/BrushTool";
+	import { PenTool } from "./tools/PenTool";
+	import { EraserTool } from "./tools/EraserTool";
+	import { PaintBucketTool } from "./tools/PaintBucketTool";
+	import { TextTool } from "./tools/TextTool";
+	import { LineTool } from "./tools/LineTool";
+	import { PolygonTool } from "./tools/PolygonTool";
+	import { RectangleTool } from "./tools/RectangleTool";
+	import { CircleTool } from "./tools/CircleTool";
+	import { TemplateTool } from "./tools/TemplateTool";
+	import { ArrowTool } from "./tools/ArrowTool";
+	import { BuilderTool } from "./tools/BuilderTool";
+	import { HideTool } from "./tools/HideTool";
+	import { LockTool } from "./tools/LockTool";
 	
 	import ToolButton from "./ToolButton.svelte";
 	import ToolGroupButton from "./ToolGroupButton.svelte";
@@ -11,33 +30,33 @@
 	const tools = [
 		[
 			new BoxSelectTool(),
-			/*new LassoSelectTool(),*/
-			/*new DiscSelectTool(),*/
+			new LassoSelectTool(),
+			new DiscSelectTool(),
 		],
 		[
-			/*new BoxPointSelectTool(),*/
-			/*new LassoPointSelectTool(),*/
-			/*new DiscPointSelectTool(),*/
+			new BoxReshapeTool(),
+			new LassoReshapeTool(),
+			new DiscReshapeTool(),
 		],
 		[
-			/*new BrushTool(),*/
-			/*new PenTool(),*/
-			/*new EraserTool(),*/
+			new BrushTool(),
+			new PenTool(),
+			new EraserTool(),
 		],
-		/*new PaintBucketTool(),*/
-		/*new TextTool(),*/
+		new PaintBucketTool(),
+		new TextTool(),
 		[
-			/*new LineTool(),*/
-			/*new PolygonTool(),*/
-			/*new RectangleTool(),*/
-			/*new CircleTool(),*/
-			/*new ShapeTool(),*/
-			/*new ArrowTool(),*/
+			new LineTool(),
+			new PolygonTool(),
+			new RectangleTool(),
+			new CircleTool(),
+			new TemplateTool(),
+			new ArrowTool(),
 		],
-		/*new ShapeBuilderTool(),*/
+		new BuilderTool(),
 		[
-			/*new HideTool(),*/
-			/*new LockTool(),*/
+			new HideTool(),
+			new LockTool(),
 		],
 	];
 	let editorState = $state({
