@@ -1,16 +1,10 @@
 <script>
+    import { Tool } from "./tools/Tool";
     
-    let { 
-        /**
-         * @type {Tool}
-         */
-        tool,
-        /**
-         * @type {boolean}
-         */
-        editorState = $bindable(),
-    } = $props()
-    $inspect(editorState.selectedTool, tool);
+    /**
+     * @type {{tool: Tool, editorState: any}}
+     */
+    let { tool, editorState = $bindable() } = $props()
 
     let selected = $derived(editorState.selectedTool === tool)
 </script>
