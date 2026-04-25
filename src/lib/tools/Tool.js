@@ -1,3 +1,3 @@
 export class Tool {
-	name = 'Tool'
+	static name = 'Tool'
 }

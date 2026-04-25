@@ -2,19 +2,19 @@
     
     let { 
         /**
-         * @type {Tool}
+         * @type {Tool[]}
          */
-        tool,
+        tools,
         /**
          * @type {boolean}
          */
         editorState = $bindable(),
     } = $props()
 
-    let selected = $derived(editorState.selectedTool === tool)
+    let selected = $derived(tools.includes(editorState.selectedTool))
 </script>
 
-<button
+<!-- <button
     type="button"
     class:active={selected}
     aria-pressed={selected}
@@ -23,7 +23,7 @@
     }}
 >
     {tool.name}
-</button>
+</button> -->
 
 <style>
     button {
@@ -34,19 +34,5 @@
 		font: inherit;
 		font-size: 13px;
 		cursor: pointer;
-
-        min-height: 48px;
-		padding: 6px;
-		border-color: var(--surface-border);
-		background: var(--surface-white);
-		color: var(--text-strong);
-		font-size: 12px;
-		font-weight: 500;
-	}
-
-    .active {
-		border-color: var(--toolbar-dark);
-		background: var(--toolbar);
-		color: white;
 	}
 </style>

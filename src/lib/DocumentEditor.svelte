@@ -3,6 +3,7 @@
 	import { BoxSelectTool } from "./tools/BoxSelectTool/BoxSelectTool";
 	
 	import ToolButton from "./ToolButton.svelte";
+	import ToolGroupButton from "./ToolGroupButton.svelte";
 
 	/**
 	 * @type {(Tool[] | Tool)[]}
@@ -39,51 +40,49 @@
 			/*new LockTool(),*/
 		],
 	];
-	let editorState = $state(
-		{
-			/**
-			 * @type {Tool | null}
-			 */
-			selectedTool: null,
-			style: {
-				fill: {
-					color: "#734b06ff",
-					/**
-					 * @type {"nonzero" | "evenodd"}
-					*/
-					fillRule: "evenodd",
-					opacity: 1, // seperate from color opacity
-				},
-				stroke: {
-					color: "#000000ff",
-					width: 4,
-					/**
-					 * @type {number[]}
-					*/
-					dashArray: [],
-					dashOffset: 0,
-					/**
-					 * @type {"butt" | "round" | "square"}
-					*/
-					lineCap: "round",
-					/**
-					 * @type {"arcs" | "bevel" | "miter" | "miter-clip" | "round"}
-					*/
-					lineJoin: "miter",
-					miterLimit: 4,
-					opacity: 1, // seperate from color opacity
-				},
-				shape: {
-					opacity: 1,
-					blur: 0,
-					/**
-					 * @type {"normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten" | "color-dodge" | "color-burn" | "hard-light" | "soft-light" | "difference" | "exclusion" | "hue" | "saturation" | "color" | "luminosity" }
-					*/
-					blendMode: "normal",
-				},
-			}
+	let editorState = $state({
+		/**
+		 * @type {Tool | null}
+		 */
+		selectedTool: null,
+		style: {
+			fill: {
+				color: "#734b06ff",
+				/**
+				 * @type {"nonzero" | "evenodd"}
+				*/
+				fillRule: "evenodd",
+				opacity: 1, // seperate from color opacity
+			},
+			stroke: {
+				color: "#000000ff",
+				width: 4,
+				/**
+				 * @type {number[]}
+				*/
+				dashArray: [],
+				dashOffset: 0,
+				/**
+				 * @type {"butt" | "round" | "square"}
+				*/
+				lineCap: "round",
+				/**
+				 * @type {"arcs" | "bevel" | "miter" | "miter-clip" | "round"}
+				*/
+				lineJoin: "miter",
+				miterLimit: 4,
+				opacity: 1, // seperate from color opacity
+			},
+			shape: {
+				opacity: 1,
+				blur: 0,
+				/**
+				 * @type {"normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten" | "color-dodge" | "color-burn" | "hard-light" | "soft-light" | "difference" | "exclusion" | "hue" | "saturation" | "color" | "luminosity" }
+				*/
+				blendMode: "normal",
+			},
 		}
-	);
+	})
 	/**
 	 * @type {Node[]}
 	 */
@@ -149,7 +148,11 @@
 	<div class="ws">
 		<aside class="tools" aria-label="Tools">
 			{#each tools as tool}
-				<ToolButton tools={tool} selected={false} {editorState}></ToolButton>
+				{#if Array.isArray(tool)}
+					<ToolButton {tool} bind:editorState></ToolButton>
+				{:else}
+					<ToolGroupButton tools={tool} bind:editorState></ToolGroupButton>
+				{/if}
 			{/each}
 		</aside>
 
@@ -223,16 +226,6 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-	}
-
-	.tools button {
-		border: 1px solid rgba(255, 255, 255, 0.22);
-		border-radius: 4px;
-		background: rgba(255, 255, 255, 0.14);
-		color: white;
-		font: inherit;
-		font-size: 13px;
-		cursor: pointer;
 	}
 
 	.status {
