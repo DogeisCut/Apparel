@@ -8,9 +8,12 @@
         /**
          * @type {boolean}
          */
-        selected,
         editorState,
     } = $props()
+
+    let selected = $derived(
+        Array.isArray(tools) ? tools.includes(editorState.selectedTool) : editorState.selectedTool === tools
+    )
 
     // Needs to be handled as a tool group if its an array, otherwise act as a single tool button
     // May be worth seperating this into two seperate components and handling which buttons are groups on the DocumentEditor side
