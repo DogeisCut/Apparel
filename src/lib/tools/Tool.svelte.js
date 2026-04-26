@@ -20,8 +20,8 @@ export class Tool {
 	/**
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {Node?} topLevelNode
-	 * @param {Node?} bottomLevelNode
+	 * @param {SVGElement?} topLevelNode
+	 * @param {SVGElement?} bottomLevelNode
 	 * @param {boolean} outline
 	 */
 	onClickStart(x, y, topLevelNode, bottomLevelNode, outline) {
@@ -31,8 +31,8 @@ export class Tool {
 	/**
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {Node?} topLevelNode
-	 * @param {Node?} bottomLevelNode
+	 * @param {SVGElement?} topLevelNode
+	 * @param {SVGElement?} bottomLevelNode
 	 * @param {boolean} outline
 	 */
 	onClickEnd(x, y, topLevelNode, bottomLevelNode, outline) {
@@ -42,8 +42,8 @@ export class Tool {
 	/**
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {Node?} topLevelNode
-	 * @param {Node?} bottomLevelNode
+	 * @param {SVGElement?} topLevelNode
+	 * @param {SVGElement?} bottomLevelNode
 	 * @param {boolean} outline
 	 */
 	whileClickHeld(x, y, topLevelNode, bottomLevelNode, outline) {
@@ -53,8 +53,8 @@ export class Tool {
 	/**
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {Node?} topLevelNode
-	 * @param {Node?} bottomLevelNode
+	 * @param {SVGElement?} topLevelNode
+	 * @param {SVGElement?} bottomLevelNode
 	 * @param {boolean} outline
 	 */
 	onHoverNodeStart(x, y, topLevelNode, bottomLevelNode, outline) {
@@ -64,8 +64,8 @@ export class Tool {
 	/**
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {Node?} topLevelNode
-	 * @param {Node?} bottomLevelNode
+	 * @param {SVGElement?} topLevelNode
+	 * @param {SVGElement?} bottomLevelNode
 	 * @param {boolean} outline
 	 */
 	onHoverNodeEnd(x, y, topLevelNode, bottomLevelNode, outline) {
@@ -75,8 +75,8 @@ export class Tool {
 	/**
 	 * @param {number} x
 	 * @param {number} y
-	 * @param {Node?} topLevelNode
-	 * @param {Node?} bottomLevelNode
+	 * @param {SVGElement?} topLevelNode
+	 * @param {SVGElement?} bottomLevelNode
 	 * @param {boolean} outline
 	 */
 	whileHoverNode(x, y, topLevelNode, bottomLevelNode, outline) {

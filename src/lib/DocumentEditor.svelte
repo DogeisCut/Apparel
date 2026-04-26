@@ -35,7 +35,7 @@
 		 */
 		selectedTool: null,
 		/**
-		 * @type {Node[]}
+		 * @type {SVGElement[]}
 		 */
 		selectedNodes: [],
 		position: {x:0,y:0},
