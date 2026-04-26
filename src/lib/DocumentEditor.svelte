@@ -156,6 +156,8 @@
 			bind:blendMode={editorState.style.shape.blendMode}
 		>
 		</ShapeStyleDropdown>
+		<div class="tool-options">
+		</div>
 		<span class="sep"></span>
 		<div class="acts">
 			<button type="button">Group</button>
