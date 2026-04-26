@@ -1,0 +1,1 @@
+// helper functions for like applying styles, adding certain elements, apply colors, and most importantly, changing points/paths
