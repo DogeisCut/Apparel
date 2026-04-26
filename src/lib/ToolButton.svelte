@@ -2,11 +2,11 @@
     import { Tool } from "./tools/Tool";
     
     /**
-     * @type {{tool: Tool, editorState: any}}
+     * @type {{tool: Tool, selectedTool: Tool?}}
      */
-    let { tool, editorState = $bindable() } = $props()
+    let { tool, selectedTool = $bindable() } = $props()
 
-    let selected = $derived(editorState.selectedTool === tool)
+    let selected = $derived(selectedTool === tool)
 </script>
 
 <button
@@ -14,7 +14,7 @@
     class:active={selected}
     aria-pressed={selected}
     onclick={() => {
-        editorState.selectedTool = tool;
+        selectedTool = tool;
     }}
 >
     {tool.name}

@@ -1,3 +1,5 @@
 export class Tool {
-	static name = 'Tool'
+	name = 'Tool'
+	constructor() {
+	}
 }

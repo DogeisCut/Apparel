@@ -24,6 +24,9 @@
 	import ToolButton from "./ToolButton.svelte";
 	import ToolGroupButton from "./ToolGroupButton.svelte";
 
+	import FillStyleDropdown from "./FillStyleDropdown.svelte"
+	import StrokeStyleDropdown from "./StrokeStyleDropdown.svelte"
+
 	/**
 	 * @type {(Tool[] | Tool)[]}
 	 */
@@ -64,6 +67,10 @@
 		 * @type {Tool | null}
 		 */
 		selectedTool: null,
+		/**
+		 * @type {Node[]}
+		 */
+		selectedNodes: [],
 		style: {
 			fill: {
 				color: "#734b06ff",
@@ -102,10 +109,6 @@
 			},
 		}
 	})
-	/**
-	 * @type {Node[]}
-	 */
-	let selectedNodes = $state([]);
 
 	let { document } = $props();
 	let canvasHost = $state();
@@ -129,14 +132,21 @@
 
 <section class="ed" aria-label="Document editor">
 	<div class="settings">
-		<label>
-			Fill
-			<input type="color" bind:value={editorState.style.fill.color} />
-		</label>
-		<label>
-			Outline
-			<input type="color" bind:value={editorState.style.stroke.color} />
-		</label>
+		<FillStyleDropdown 
+			bind:color={editorState.style.fill.color}
+			bind:fillRule={editorState.style.fill.fillRule}
+			bind:opacity={editorState.style.fill.opacity}
+		></FillStyleDropdown>
+		<StrokeStyleDropdown 
+			bind:color={editorState.style.stroke.color}
+			bind:width={editorState.style.stroke.width}
+			bind:dashArray={editorState.style.stroke.dashArray}
+			bind:dashOffset={editorState.style.stroke.dashOffset}
+			bind:lineCap={editorState.style.stroke.lineCap}
+			bind:lineJoin={editorState.style.stroke.lineJoin}
+			bind:miterLimit={editorState.style.stroke.miterLimit}
+			bind:opacity={editorState.style.stroke.opacity}
+		></StrokeStyleDropdown>
 		<label>
 			Width
 			<input
@@ -168,9 +178,9 @@
 		<aside class="tools" aria-label="Tools">
 			{#each tools as tool}
 				{#if Array.isArray(tool)}
-					<ToolGroupButton tools={tool} bind:editorState></ToolGroupButton>
+					<ToolGroupButton tools={tool} bind:selectedTool={editorState.selectedTool}></ToolGroupButton>
 				{:else}
-					<ToolButton {tool} bind:editorState></ToolButton>
+					<ToolButton {tool} bind:selectedTool={editorState.selectedTool}></ToolButton>
 				{/if}
 			{/each}
 		</aside>

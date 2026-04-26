@@ -2,16 +2,16 @@
     import { Tool } from "./tools/Tool";
 
     /**
-     * @type {{tools: Tool[], editorState: any}}
+     * @type {{tools: Tool[], selectedTool: Tool?}}
      */
-    let { tools, editorState = $bindable() } = $props()
+    let { tools, selectedTool = $bindable() } = $props()
 
     /**
      * @type {Tool?}
      */
     let tool = $derived(tools[0] ?? null);
 
-    let selected = $derived(tools.includes(editorState.selectedTool))
+    let selected = $derived(selectedTool ? tools.includes(selectedTool) : false)
 </script>
 
 <button
