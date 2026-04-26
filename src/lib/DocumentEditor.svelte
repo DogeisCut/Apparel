@@ -28,6 +28,7 @@
 	import StrokeStyleDropdown from "./StrokeStyleDropdown.svelte"
 	import ShapeStyleDropdown from "./ShapeStyleDropdown.svelte"
 
+	//TODO: make this a class so i can use jsdoc with it
 	let editorState = $state({
 		/**
 		 * @type {Tool | null}
@@ -98,7 +99,7 @@
 	/**
 	 * @type {(Tool[] | Tool)[]}
 	 */
-	const tools = [
+	const tools = $derived([
 		[
 			new BoxSelectTool(editorState, document),
 			new LassoSelectTool(editorState, document),
@@ -129,7 +130,7 @@
 			new HideTool(editorState, document),
 			new LockTool(editorState, document),
 		],
-	];
+	]);
 </script>
 
 <section class="ed" aria-label="Document editor">
