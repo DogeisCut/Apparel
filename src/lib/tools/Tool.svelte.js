@@ -1,8 +1,13 @@
 import { Document } from "$lib/Document.svelte"
+import ToolOptions from "./ToolOptions.svelte"
 
 export class Tool {
 	name = 'Tool' // idk how to make this static without breaking anything, static keyword causes scripts to complain when getting it from instances
 	active = false
+	/**
+	 * @type {import('svelte').Component}
+	 */
+	options = ToolOptions
 	/**
 	 * @param {Record<string, any>} editorState
 	 * @param {Document} document

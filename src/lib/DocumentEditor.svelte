@@ -1,25 +1,25 @@
 <script>
-	import { Tool } from "./tools/Tool";
-	import { BoxSelectTool } from "./tools/BoxSelectTool";
-	import { LassoSelectTool } from "./tools/LassoSelectTool";
-	import { DiscSelectTool } from "./tools/DiscSelectTool";
-	import { BoxReshapeTool } from "./tools/BoxReshapeTool";
-	import { LassoReshapeTool } from "./tools/LassoReshapeTool";
-	import { DiscReshapeTool } from "./tools/DiscReshapeTool";
-	import { BrushTool } from "./tools/BrushTool";
-	import { PenTool } from "./tools/PenTool";
-	import { EraserTool } from "./tools/EraserTool";
-	import { PaintBucketTool } from "./tools/PaintBucketTool";
-	import { TextTool } from "./tools/TextTool";
-	import { LineTool } from "./tools/LineTool";
-	import { PolygonTool } from "./tools/PolygonTool";
-	import { RectangleTool } from "./tools/RectangleTool";
-	import { CircleTool } from "./tools/CircleTool";
-	import { TemplateTool } from "./tools/TemplateTool";
-	import { ArrowTool } from "./tools/ArrowTool";
-	import { BuilderTool } from "./tools/BuilderTool";
-	import { HideTool } from "./tools/HideTool";
-	import { LockTool } from "./tools/LockTool";
+	import { Tool } from "./tools/Tool.svelte";
+	import { BoxSelectTool } from "./tools/BoxSelectTool.svelte";
+	import { LassoSelectTool } from "./tools/LassoSelectTool.svelte";
+	import { DiscSelectTool } from "./tools/DiscSelectTool.svelte";
+	import { BoxReshapeTool } from "./tools/BoxReshapeTool.svelte";
+	import { LassoReshapeTool } from "./tools/LassoReshapeTool.svelte";
+	import { DiscReshapeTool } from "./tools/DiscReshapeTool.svelte";
+	import { BrushTool } from "./tools/BrushTool.svelte";
+	import { PenTool } from "./tools/PenTool.svelte";
+	import { EraserTool } from "./tools/EraserTool.svelte";
+	import { PaintBucketTool } from "./tools/PaintBucketTool.svelte";
+	import { TextTool } from "./tools/TextTool.svelte";
+	import { LineTool } from "./tools/LineTool.svelte";
+	import { PolygonTool } from "./tools/PolygonTool.svelte";
+	import { RectangleTool } from "./tools/RectangleTool.svelte";
+	import { CircleTool } from "./tools/CircleTool.svelte";
+	import { TemplateTool } from "./tools/TemplateTool.svelte";
+	import { ArrowTool } from "./tools/ArrowTool.svelte";
+	import { BuilderTool } from "./tools/BuilderTool.svelte";
+	import { HideTool } from "./tools/HideTool.svelte";
+	import { LockTool } from "./tools/LockTool.svelte";
 	
 	import ToolButton from "./ToolButton.svelte";
 	import ToolGroupButton from "./ToolGroupButton.svelte";
@@ -156,7 +156,11 @@
 			bind:blendMode={editorState.style.shape.blendMode}
 		>
 		</ShapeStyleDropdown>
+		<span class="sep"></span>
 		<div class="tool-options">
+			{#if editorState.selectedTool}
+				<editorState.selectedTool.options tool={editorState.selectedTool}></editorState.selectedTool.options>
+			{/if}
 		</div>
 		<span class="sep"></span>
 		<div class="acts">

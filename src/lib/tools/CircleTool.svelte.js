@@ -1,8 +1,8 @@
-import { ShapeTool } from './ShapeTool'
+import { ShapeTool } from './ShapeTool.svelte'
 
 export class CircleTool extends ShapeTool {
 	name = 'Circle'
 
 	// Tool Settings
-	radius = 4
+	radius = $state(4)
 }

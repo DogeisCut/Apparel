@@ -1,4 +1,4 @@
-import { ShapeTool } from './ShapeTool'
+import { ShapeTool } from './ShapeTool.svelte'
 
 export class TemplateTool extends ShapeTool {
 	name = 'Template'

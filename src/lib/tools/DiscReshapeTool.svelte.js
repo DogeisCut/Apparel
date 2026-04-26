@@ -1,8 +1,8 @@
-import { ReshapeTool } from './ReshapeTool'
+import { ReshapeTool } from './ReshapeTool.svelte'
 
 export class DiscReshapeTool extends ReshapeTool {
 	name = 'Disc Reshape'
 	
 	// Tool Settings
-	radius = 4
+	radius = $state(4)
 }

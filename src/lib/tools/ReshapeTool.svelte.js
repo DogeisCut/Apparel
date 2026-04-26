@@ -1,4 +1,4 @@
-import { Tool } from './Tool'
+import { Tool } from './Tool.svelte'
 
 // Tool Base
 export class ReshapeTool extends Tool {
@@ -8,8 +8,8 @@ export class ReshapeTool extends Tool {
 	/**
 	 * @type {("smooth" | "sphere" | "root" | "inverseSquare" | "sharp" | "linear" | "constant" | "random")?}
 	 */
-	proportionalEditingFalloff = null
-	proportionalSize = 5
+	proportionalEditingFalloff = $state(null)
+	proportionalSize = $state(5)
 
 	// Tool Runtime Properties
 	/**

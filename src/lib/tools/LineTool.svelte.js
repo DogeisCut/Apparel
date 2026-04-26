@@ -1,4 +1,4 @@
-import { DraggedTool } from './DraggedTool'
+import { DraggedTool } from './DraggedTool.svelte'
 
 export class LineTool extends DraggedTool {
 	name = 'Line'

@@ -1,5 +1,5 @@
 <script>
-    import { Tool } from "./tools/Tool";
+    import { Tool } from "./tools/Tool.svelte";
 
     /**
      * @type {{tools: Tool[], selectedTool: Tool?}}

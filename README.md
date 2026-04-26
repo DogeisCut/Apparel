@@ -1,2 +1,2 @@
 # Apparel
-scratch-paint inspired vector editor built with Svelete and browser SVG
+scratch-paint inspired vector editor built with Svelte and browser SVG
