@@ -26,6 +26,7 @@
 
 	import FillStyleDropdown from "./FillStyleDropdown.svelte"
 	import StrokeStyleDropdown from "./StrokeStyleDropdown.svelte"
+	import ShapeStyleDropdown from "./ShapeStyleDropdown.svelte"
 
 	/**
 	 * @type {(Tool[] | Tool)[]}
@@ -147,26 +148,12 @@
 			bind:miterLimit={editorState.style.stroke.miterLimit}
 			bind:opacity={editorState.style.stroke.opacity}
 		></StrokeStyleDropdown>
-		<label>
-			Width
-			<input
-				class="num"
-				type="number"
-				min="0"
-				bind:value={editorState.style.stroke.width}
-			/>
-		</label>
-		<label>
-			Opacity
-			<input
-				class="range"
-				type="range"
-				min="0"
-				max="1"
-				step="0.05"
-				bind:value={editorState.style.shape.opacity}
-			/>
-		</label>
+		<ShapeStyleDropdown
+			bind:opacity={editorState.style.shape.opacity}
+			bind:blur={editorState.style.shape.blur}
+			bind:blendMode={editorState.style.shape.blendMode}
+		>
+		</ShapeStyleDropdown>
 		<span class="sep"></span>
 		<div class="acts">
 			<button type="button">Group</button>
