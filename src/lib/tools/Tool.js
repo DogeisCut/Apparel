@@ -1,6 +1,14 @@
+import { Document } from "$lib/Document.svelte"
+
 export class Tool {
 	name = 'Tool'
-	constructor() {
+	/**
+	 * @param {Record<string, any>} editorState
+	 * @param {Document} document
+	 */
+	constructor(editorState, document) {
+		this.editorState = editorState
+		this.document = document
 	}
 
 	/**

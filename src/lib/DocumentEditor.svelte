@@ -28,41 +28,6 @@
 	import StrokeStyleDropdown from "./StrokeStyleDropdown.svelte"
 	import ShapeStyleDropdown from "./ShapeStyleDropdown.svelte"
 
-	/**
-	 * @type {(Tool[] | Tool)[]}
-	 */
-	const tools = [
-		[
-			new BoxSelectTool(),
-			new LassoSelectTool(),
-			new DiscSelectTool(),
-		],
-		[
-			new BoxReshapeTool(),
-			new LassoReshapeTool(),
-			new DiscReshapeTool(),
-		],
-		[
-			new BrushTool(),
-			new PenTool(),
-			new EraserTool(),
-		],
-		new PaintBucketTool(),
-		new TextTool(),
-		[
-			new LineTool(),
-			new PolygonTool(),
-			new RectangleTool(),
-			new CircleTool(),
-			new TemplateTool(),
-			new ArrowTool(),
-		],
-		new BuilderTool(),
-		[
-			new HideTool(),
-			new LockTool(),
-		],
-	];
 	let editorState = $state({
 		/**
 		 * @type {Tool | null}
@@ -72,6 +37,8 @@
 		 * @type {Node[]}
 		 */
 		selectedNodes: [],
+		position: {x:0,y:0},
+		zoom: 1,
 		style: {
 			fill: {
 				color: "#734b06ff",
@@ -111,10 +78,8 @@
 		}
 	})
 
-	let { document } = $props();
+	let { document = $bindable() } = $props();
 	let canvasHost = $state();
-	let zoom = $state(100);
-	let position = $state({ x: 0, y: 0 });
 
 	$effect(() => {
 		const svg = document.ensureSvgElement();
@@ -129,6 +94,42 @@
 		svg.style.background = "rgba(255, 255, 255, 0.92)";
 		canvasHost.replaceChildren(svg);
 	});
+
+	/**
+	 * @type {(Tool[] | Tool)[]}
+	 */
+	const tools = [
+		[
+			new BoxSelectTool(editorState, document),
+			new LassoSelectTool(editorState, document),
+			new DiscSelectTool(editorState, document),
+		],
+		[
+			new BoxReshapeTool(editorState, document),
+			new LassoReshapeTool(editorState, document),
+			new DiscReshapeTool(editorState, document),
+		],
+		[
+			new BrushTool(editorState, document),
+			new PenTool(editorState, document),
+			new EraserTool(editorState, document),
+		],
+		new PaintBucketTool(editorState, document),
+		new TextTool(editorState, document),
+		[
+			new LineTool(editorState, document),
+			new PolygonTool(editorState, document),
+			new RectangleTool(editorState, document),
+			new CircleTool(editorState, document),
+			new TemplateTool(editorState, document),
+			new ArrowTool(editorState, document),
+		],
+		new BuilderTool(editorState, document),
+		[
+			new HideTool(editorState, document),
+			new LockTool(editorState, document),
+		],
+	];
 </script>
 
 <section class="ed" aria-label="Document editor">
@@ -189,14 +190,15 @@
 				<input
 					class="zoom"
 					type="number"
-					min="10"
-					max="800"
-					bind:value={zoom}
+					min="0.1"
+					max="8"
+					defaultvalue="1"
+					bind:value={editorState.zoom}
 				/>
 				<span>%</span>
 			</label>
-			<span>X {position.x}</span>
-			<span>Y {position.y}</span>
+			<span>X {editorState.position.x}</span>
+			<span>Y {editorState.position.y}</span>
 		</div>
 	</footer>
 </section>
