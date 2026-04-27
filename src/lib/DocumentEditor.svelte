@@ -237,43 +237,41 @@
 						<rect y="8" width="8" height="8" fill="#1e1e20" />
 					</pattern>
 					<mask id="out-of-bounds-mask">
-						<rect x="-50000" y="-50000" width="100000" height="100000" fill="white" />
+						<rect width="100%" height="100%" fill="white" />
 						
-						<rect x="0" y="0" width={document.width} height={document.height} fill="black" />
+						<rect x={editorState.position.x} y={editorState.position.y} width={document.width*editorState.zoom} height={document.height*editorState.zoom} fill="black" />
 					</mask>
 				</defs>
 				<rect width="100%" height="100%" fill="url(#dark-checkerboard)" />
-				<g transform="translate({editorState.position.x},{editorState.position.y}) scale({editorState.zoom})">
-					<g fill="none" stroke-linecap="round" opacity="0.5" transform="translate({document.width/2},{document.height/2}) scale({1/editorState.zoom})">
-						<g stroke="#ffffff" stroke-width="4">
-							<line x1="0" y1="-8" x2="0" y2="8" />
-							<line x1="-8" y1="0" x2="8" y2="0" />
-							<circle r="6" cx="0" cy="0" />
-						</g>
-						<g stroke="#000000" stroke-width="2">
-							<line x1="0" y1="-8" x2="0" y2="8" />
-							<line x1="-8" y1="0" x2="8" y2="0" />
-							<circle r="6" cx="0" cy="0" />
-						</g>
+				<g fill="none" stroke-linecap="round" opacity="0.5" transform="translate({document.width/2*editorState.zoom},{document.height/2*editorState.zoom}) translate({editorState.position.x},{editorState.position.y})">
+					<g stroke="#ffffff" stroke-width="4">
+						<line x1="0" y1="-8" x2="0" y2="8" />
+						<line x1="-8" y1="0" x2="8" y2="0" />
+						<circle r="6" cx="0" cy="0" />
 					</g>
+					<g stroke="#000000" stroke-width="2">
+						<line x1="0" y1="-8" x2="0" y2="8" />
+						<line x1="-8" y1="0" x2="8" y2="0" />
+						<circle r="6" cx="0" cy="0" />
+					</g>
+				</g>
+				<g transform="translate({editorState.position.x},{editorState.position.y}) scale({editorState.zoom})">
 					{@html document.svg.innerHTML} 
-					<rect 
-						x="-50000" 
-						y="-50000" 
-						width="100000" 
-						height="100000" 
-						fill="#ffffff" 
-						opacity="0.1" 
-						mask="url(#out-of-bounds-mask)" 
-						pointer-events="none" 
-					/>
-					<g fill="none" stroke-linecap="round" opacity="0.5">
-						<g stroke="#ffffff" stroke-width="{4 / editorState.zoom}">
-							<rect width={document.width} height={document.height} x="0" y="0" rx="0" ry="0" />
-						</g>
-						<g stroke="#000000" stroke-width="{2 / editorState.zoom}">
-							<rect width={document.width} height={document.height} x="0" y="0" rx="0" ry="0" />
-						</g>
+				</g>
+				<rect 
+					width="100%" 
+					height="100%" 
+					fill="#ffffff" 
+					opacity="0.1" 
+					mask="url(#out-of-bounds-mask)" 
+					pointer-events="none" 
+				/>
+				<g fill="none" stroke-linecap="round" opacity="0.5">
+					<g stroke="#ffffff" stroke-width="4">
+						<rect width={document.width*editorState.zoom} height={document.height*editorState.zoom} x={editorState.position.x} y={editorState.position.y} rx="0" ry="0" />
+					</g>
+					<g stroke="#000000" stroke-width="2">
+						<rect width={document.width*editorState.zoom} height={document.height*editorState.zoom} x={editorState.position.x} y={editorState.position.y} rx="0" ry="0" />
 					</g>
 				</g>
 			</svg>
