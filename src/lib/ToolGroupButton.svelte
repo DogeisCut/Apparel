@@ -15,7 +15,7 @@
 	let tool = $derived(tools[0] ?? null);
 
 	let selected = $derived(
-		selectedTool ? tools.includes(selectedTool) : false,
+		tool === (selectedTool),
 	);
 	let open = $state(false);
 	let visibleTools = $derived(
