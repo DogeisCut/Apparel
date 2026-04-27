@@ -1,5 +1,6 @@
 import { Document } from "$lib/Document.svelte"
 import ToolOptions from "./ToolOptions.svelte"
+import ToolOverlay from "./ToolOverlay.svelte"
 
 export class Tool {
 	name = 'Tool' // idk how to make this static without breaking anything, static keyword causes scripts to complain when getting it from instances
@@ -8,6 +9,10 @@ export class Tool {
 	 * @type {import('svelte').Component}
 	 */
 	options = ToolOptions
+	/**
+	 * @type {import('svelte').Component}
+	 */
+	overlay = ToolOverlay
 	/**
 	 * @param {Record<string, any>} editorState
 	 * @param {Document} document
@@ -25,7 +30,7 @@ export class Tool {
 	 * @param {boolean} outline
 	 */
 	onClickStart(x, y, topLevelNode, bottomLevelNode, outline) {
-		
+
 	}
 
 	/**

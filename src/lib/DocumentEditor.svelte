@@ -172,13 +172,73 @@
 		if (editorState.canvas && document) {
 			const containerRect = editorState.canvas.getBoundingClientRect();
 
-			// Calculate center: (Container width/2) - (Document width/2)
 			editorState.position.x =
 				containerRect.width / 2 - document.width / 2;
 			editorState.position.y =
 				containerRect.height / 2 - document.height / 2;
 		}
 	});
+
+	// TODO: move these into editorstate
+	let isDragging = $state(false)
+	let lastHoveredNode = $state(null)
+
+	let canvasSvg = $state()
+	let contentGroup = $state()
+
+	const dom = window.document
+
+	//TODO: move these into svghelper or something
+	/**
+	 * @param {number} clientX
+	 * @param {number} clientY
+	 */
+	function getHitElements(clientX, clientY) {
+		// top level selection is bugged, it selects tool SVG sometimes, and also goes too far up the xml tree.
+		if (!contentGroup) return { topLevel: null, bottomLevel: null, outline: false }
+
+		const hits = dom.elementsFromPoint(clientX, clientY)
+			.filter(el => contentGroup.contains(el) && el !== contentGroup)
+
+		if (hits.length === 0) return { topLevel: null, bottomLevel: null, outline: false }
+
+		const bottomLevel = hits[0] 
+
+		/**
+		 * @type {Element?}
+		 */
+		let topLevel = bottomLevel
+		while (topLevel.parentElement !== contentGroup) {
+			if (!topLevel.parentElement) { topLevel = null; break }
+			topLevel = topLevel.parentElement
+		}
+
+		return { topLevel, bottomLevel, outline: isOnOutline(clientX, clientY, bottomLevel) }
+	}
+
+	/**
+	 * @param {number} clientX
+	 * @param {number} clientY
+	 * @param {Element} element
+	 * @returns {boolean}
+	 */
+	function isOnOutline(clientX, clientY, element) {
+		if (!(element instanceof SVGGeometryElement)) return false
+		const ctm = element.getScreenCTM()
+		if (!ctm) return false
+
+		const pt = canvasSvg.createSVGPoint()
+		pt.x = clientX; pt.y = clientY
+		const localPt = pt.matrixTransform(ctm.inverse())
+
+		const minHitWidth = 8 / editorState.zoom
+		const actualWidth = parseFloat(getComputedStyle(element).strokeWidth) || 0
+		if (actualWidth < minHitWidth) element.style.strokeWidth = String(minHitWidth)
+		const inStroke = element.isPointInStroke(localPt)
+		if (actualWidth < minHitWidth) element.style.strokeWidth = ''
+		
+		return inStroke && !element.isPointInFill(localPt)
+	}
 </script>
 
 <section class="ed" aria-label="Document editor">
@@ -215,10 +275,10 @@
 			</div>
 			{#if selectedToolWithOptions}
 				{@const selectedTool = selectedToolWithOptions}
+				{@const T = selectedTool.options}
 				<span class="sep"></span>
 				<div class="tool-options">
-					<selectedTool.options tool={selectedTool}
-					></selectedTool.options>
+					<T tool={selectedTool}></T>
 				</div>
 			{/if}
 		</div>
@@ -280,6 +340,16 @@
 						y: e.clientY - editorState.position.y,
 					};
 				}
+				if (e.button !== 0 || !editorState.selectedTool) return
+				e.currentTarget.setPointerCapture(e.pointerId)
+				isDragging = true
+				const { x, y } = getCanvasCoordinates(e)
+				const { topLevel, bottomLevel, outline } = getHitElements(e.clientX, e.clientY)
+				if (!topLevel) {
+					editorState.selectedNodes.length = 0
+				}
+				//@ts-ignore
+				editorState.selectedTool.onClickStart(x, y, topLevel, bottomLevel, outline)
 			}}
 			onpointermove={(e) => {
 				if (editorState.pan.isPanning) {
@@ -288,15 +358,46 @@
 					editorState.position.y =
 						e.clientY - editorState.pan.panStart.y;
 				}
+				const { x, y } = getCanvasCoordinates(e)
+				const { topLevel, bottomLevel, outline } = getHitElements(e.clientX, e.clientY)
+				
+				editorState.selectedTool?.onMouseMoved(x, y)
+
+				if (isDragging) {
+				//@ts-ignore
+					editorState.selectedTool?.whileClickHeld(x, y, topLevel, bottomLevel, outline)
+				}
+
+				if (topLevel !== lastHoveredNode) {
+					if (lastHoveredNode) {
+						//@ts-ignore
+						editorState.selectedTool?.onHoverNodeEnd(x, y, lastHoveredNode, bottomLevel, outline)
+					}
+					if (topLevel) {
+				//@ts-ignore
+					editorState.selectedTool?.onHoverNodeStart(x, y, topLevel, bottomLevel, outline)
+					}
+				//@ts-ignore
+					lastHoveredNode = topLevel
+				} else if (topLevel) {
+				//@ts-ignore
+					editorState.selectedTool?.whileHoverNode(x, y, topLevel, bottomLevel, outline)
+				}
 			}}
-			onpointerup={() => {
-				editorState.pan.isPanning = false;
+			onpointerup={(e) => {
+				editorState.pan.isPanning = false
+				if (e.button !== 0 || !isDragging) return
+				isDragging = false
+				const { x, y } = getCanvasCoordinates(e)
+				const { topLevel, bottomLevel, outline } = getHitElements(e.clientX, e.clientY)
+				//@ts-ignore
+				editorState.selectedTool?.onClickEnd(x, y, topLevel, bottomLevel, outline)
 			}}
 			onpointerleave={() => {
 				editorState.pan.isPanning = false;
 			}}
 		>
-			<svg class="canvasContents">
+			<svg class="canvasContents" bind:this={canvasSvg}>
 				<defs>
 					<pattern
 						id="dark-checkerboard"
@@ -361,17 +462,14 @@
 				<g
 					transform="translate({editorState.position.x},{editorState
 						.position.y}) scale({editorState.zoom})"
+						bind:this={contentGroup}
 				>
-					{@html document.svg.innerHTML}
-					{#each editorState.selectedNodes as selectedNode}
-						<g
-							stroke="var(--toolbar)"
-							stroke-width={4 / editorState.zoom}
-						>
-							<!-- not the proper way to render the selection outline since we cant really remove the fill or other styles...-->
-							{@html selectedNode.outerHTML}
-						</g>
-					{/each}
+					{@html document.svgHtml}
+
+					{#if editorState.selectedTool}
+						{@const T = editorState.selectedTool}
+						<T.overlay tool={T} {editorState} />
+					{/if}
 				</g>
 				<g fill="none" stroke-linecap="round" opacity="0.5">
 					<g stroke="#ffffff" stroke-width="4">

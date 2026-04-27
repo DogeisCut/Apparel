@@ -9,7 +9,19 @@ export class Document {
 	width = $state(600);
 	height = $state(400);
 	/** @type {SVGSVGElement | null} */
-	svg = $state(null);
+	svg = null;
+
+	/** @private */
+	_version = $state(0);
+	
+	svgHtml = $derived.by(() => {
+		this._version;
+		return this.svg?.innerHTML ?? '';
+	});
+
+	markDirty() {
+		this._version++;
+	}
 
 	constructor(name = 'Untiled Document', width = 600, height = 400) {
 		this.name = name;
