@@ -80,24 +80,6 @@
 	})
 
 	let { document = $bindable() } = $props();
-	let canvasHost = $state();
-
-	$effect(() => {
-		const svg = document.ensureSvgElement();
-
-		if (!canvasHost || !svg) {
-			return;
-		}
-
-		svg.style.display = "block";
-		svg.style.width = `${document.width}px`;
-		svg.style.height = `${document.height}px`;
-		svg.style.background = "rgba(255, 255, 255, 0.92)";
-
-		svg.style.overflow = "visible";
-
-		canvasHost.replaceChildren(svg);
-	});
 
 	/**
 	 * @type {(Tool[] | Tool)[]}
@@ -233,14 +215,68 @@
 			{/each}
 		</aside>
 
-		<div class="cwrap"
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<div class="canvas"
 			onwheel={handleWheel}
 			onpointerdown={handlePanStart}
 			onpointermove={handlePanMove}
 			onpointerup={handlePanEnd}
 			onpointerleave={handlePanEnd}
 		>
-			<div class="can" bind:this={canvasHost}></div>
+			<svg class="canvasContents">
+				<defs>
+					<pattern 
+						id="dark-checkerboard" 
+						width="16" 
+						height="16" 
+						patternUnits="userSpaceOnUse"
+						patternTransform="translate({editorState.position.x + document.width/2 * editorState.zoom}, {editorState.position.y + document.height/2 * editorState.zoom}) scale({editorState.zoom})"
+					>
+						<rect width="16" height="16" fill="#2a2b2e" />
+						<rect x="8" width="8" height="8" fill="#1e1e20" />
+						<rect y="8" width="8" height="8" fill="#1e1e20" />
+					</pattern>
+					<mask id="out-of-bounds-mask">
+						<rect x="-50000" y="-50000" width="100000" height="100000" fill="white" />
+						
+						<rect x="0" y="0" width={document.width} height={document.height} fill="black" />
+					</mask>
+				</defs>
+				<rect width="100%" height="100%" fill="url(#dark-checkerboard)" />
+				<g transform="translate({editorState.position.x},{editorState.position.y}) scale({editorState.zoom})">
+					<g fill="none" stroke-linecap="round" opacity="0.5" transform="translate({document.width/2},{document.height/2}) scale({1/editorState.zoom})">
+						<g stroke="#ffffff" stroke-width="4">
+							<line x1="0" y1="-8" x2="0" y2="8" />
+							<line x1="-8" y1="0" x2="8" y2="0" />
+							<circle r="6" cx="0" cy="0" />
+						</g>
+						<g stroke="#000000" stroke-width="2">
+							<line x1="0" y1="-8" x2="0" y2="8" />
+							<line x1="-8" y1="0" x2="8" y2="0" />
+							<circle r="6" cx="0" cy="0" />
+						</g>
+					</g>
+					{@html document.svg.innerHTML} 
+					<rect 
+						x="-50000" 
+						y="-50000" 
+						width="100000" 
+						height="100000" 
+						fill="#ffffff" 
+						opacity="0.1" 
+						mask="url(#out-of-bounds-mask)" 
+						pointer-events="none" 
+					/>
+					<g fill="none" stroke-linecap="round" opacity="0.5">
+						<g stroke="#ffffff" stroke-width="{4 / editorState.zoom}">
+							<rect width={document.width} height={document.height} x="0" y="0" rx="0" ry="0" />
+						</g>
+						<g stroke="#000000" stroke-width="{2 / editorState.zoom}">
+							<rect width={document.width} height={document.height} x="0" y="0" rx="0" ry="0" />
+						</g>
+					</g>
+				</g>
+			</svg>
 		</div>
 	</div>
 
@@ -316,7 +352,6 @@
 		font-size: 13px;
 	}
 
-	.settings label,
 	.status label {
 		display: flex;
 		align-items: center;
@@ -354,34 +389,6 @@
 		background: var(--surface-border);
 	}
 
-	.settings input {
-		accent-color: var(--toolbar);
-	}
-
-	input[type="color"] {
-		width: 30px;
-		height: 26px;
-		padding: 0;
-		border: 1px solid var(--surface-border);
-		border-radius: 4px;
-		background: var(--surface-white);
-		overflow: hidden;
-		cursor: pointer;
-	}
-
-	input[type="color"]::-webkit-color-swatch-wrapper {
-		padding: 0;
-	}
-
-	input[type="color"]::-webkit-color-swatch {
-		border: none;
-	}
-
-	input[type="color"]::-moz-color-swatch {
-		border: none;
-	}
-
-	.num,
 	.zoom {
 		width: 64px;
 		height: 28px;
@@ -391,10 +398,6 @@
 		color: var(--text-strong);
 		font: inherit;
 		font-size: 13px;
-	}
-
-	.range {
-		width: 120px;
 	}
 
 	.ws {
@@ -412,30 +415,11 @@
 		background: var(--surface-soft);
 	}
 
-	.cwrap {
+	.canvas {
 		position: relative;
 		overflow: hidden;
 		min-width: 0;
 		min-height: 0;
-		background-color: #171a20;
-		background-image: linear-gradient(45deg, #101318 25%, transparent 25%),
-			linear-gradient(-45deg, #101318 25%, transparent 25%),
-			linear-gradient(45deg, transparent 75%, #101318 75%),
-			linear-gradient(-45deg, transparent 75%, #101318 75%);
-		background-position:
-			0 0,
-			0 10px,
-			10px -10px,
-			-10px 0;
-		background-size: 20px 20px;
-	}
-
-	.can {
-		position: absolute;
-		transform-origin: 0 0;
-		overflow: visible;
-		border: 1px solid rgba(255, 255, 255, 0.36);
-		box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
 	}
 
 	.status {
@@ -451,5 +435,10 @@
 
 	.sr {
 		color: var(--text-muted);
+	}
+
+	svg {
+		width: 100%;
+		height: 100%;
 	}
 </style>
