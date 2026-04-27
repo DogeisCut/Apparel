@@ -86,7 +86,6 @@
 	<div class="meta">
 		{#if activeDocument}
 			<span>{activeDocument.width} x {activeDocument.height}</span>
-			<span>0 selected</span>
 		{/if}
 	</div>
 </header>
