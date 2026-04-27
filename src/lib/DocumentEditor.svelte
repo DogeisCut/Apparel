@@ -47,6 +47,10 @@
 	//TODO: make this a class so i can use jsdoc with it
 	let editorState = $state({
 		/**
+		 * @type {HTMLDivElement?}
+		*/
+		canvas: null,
+		/**
 		 * @type {Tool | null}
 		 */
 		selectedTool: null,
@@ -54,7 +58,10 @@
 		 * @type {SVGElement[]}
 		 */
 		selectedNodes: [],
-		position: {x:0,y:0},
+		position: {
+			x:0,
+			y:0
+		},
 		zoom: 1,
 		pan: {
 			isPanning: false,
@@ -152,6 +159,16 @@
 			editorState.selectedTool.onToolActivated();
 		}
 	});
+
+	$effect(() => {
+		if (editorState.canvas && document) {
+			const containerRect = editorState.canvas.getBoundingClientRect();
+			
+			// Calculate center: (Container width/2) - (Document width/2)
+			editorState.position.x = (containerRect.width / 2) - (document.width / 2);
+			editorState.position.y = (containerRect.height / 2) - (document.height / 2);
+		}
+	});
 </script>
 
 <section class="ed" aria-label="Document editor">
@@ -203,6 +220,7 @@
 
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="canvas"
+			bind:this={editorState.canvas}
 			onwheel={(e) => {
 				if (!e.ctrlKey) return 
 				e.preventDefault(); 
