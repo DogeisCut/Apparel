@@ -93,6 +93,9 @@
 		svg.style.width = `${document.width}px`;
 		svg.style.height = `${document.height}px`;
 		svg.style.background = "rgba(255, 255, 255, 0.92)";
+
+		svg.style.overflow = "visible";
+
 		canvasHost.replaceChildren(svg);
 	});
 
@@ -131,6 +134,56 @@
 			new LockTool(editorState, document),
 		],
 	]);
+	let isPanning = $state(false);
+	let panStart = $state({ x: 0, y: 0 });
+
+	/**
+     * @param {{ preventDefault: () => void; deltaY: number; currentTarget: { getBoundingClientRect: () => any; }; clientX: number; clientY: number; }} e
+     */
+	function handleWheel(e) {
+		e.preventDefault(); 
+		
+		const zoomFactor = 1.1;
+		const direction = e.deltaY > 0 ? -1 : 1;
+		const newZoom = direction > 0 ? editorState.zoom * zoomFactor : editorState.zoom / zoomFactor;
+		
+		const clampedZoom = Math.min(Math.max(newZoom, 0.1), 8);
+
+		const rect = e.currentTarget.getBoundingClientRect();
+		const mouseX = e.clientX - rect.left;
+		const mouseY = e.clientY - rect.top;
+
+		editorState.position.x = mouseX - (mouseX - editorState.position.x) * (clampedZoom / editorState.zoom);
+		editorState.position.y = mouseY - (mouseY - editorState.position.y) * (clampedZoom / editorState.zoom);
+		editorState.zoom = clampedZoom;
+	}
+
+	/**
+     * @param {{ button: number; altKey: any; clientX: number; clientY: number; }} e
+     */
+	function handlePanStart(e) {
+		if (e.button === 1 || (e.button === 0 && e.altKey)) {
+			isPanning = true;
+			panStart = {
+				x: e.clientX - editorState.position.x,
+				y: e.clientY - editorState.position.y
+			};
+		}
+	}
+
+	/**
+     * @param {{ clientX: number; clientY: number; }} e
+     */
+	function handlePanMove(e) {
+		if (isPanning) {
+			editorState.position.x = e.clientX - panStart.x;
+			editorState.position.y = e.clientY - panStart.y;
+		}
+	}
+
+	function handlePanEnd() {
+		isPanning = false;
+	}
 </script>
 
 <section class="ed" aria-label="Document editor">
@@ -180,7 +233,13 @@
 			{/each}
 		</aside>
 
-		<div class="cwrap">
+		<div class="cwrap"
+			onwheel={handleWheel}
+			onpointerdown={handlePanStart}
+			onpointermove={handlePanMove}
+			onpointerup={handlePanEnd}
+			onpointerleave={handlePanEnd}
+		>
 			<div class="can" bind:this={canvasHost}></div>
 		</div>
 	</div>
@@ -354,12 +413,10 @@
 	}
 
 	.cwrap {
-		display: grid;
-		place-items: center;
+		position: relative;
+		overflow: hidden;
 		min-width: 0;
 		min-height: 0;
-		padding: 32px;
-		overflow: auto;
 		background-color: #171a20;
 		background-image: linear-gradient(45deg, #101318 25%, transparent 25%),
 			linear-gradient(-45deg, #101318 25%, transparent 25%),
@@ -374,6 +431,9 @@
 	}
 
 	.can {
+		position: absolute;
+		transform-origin: 0 0;
+		overflow: visible;
 		border: 1px solid rgba(255, 255, 255, 0.36);
 		box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
 	}
