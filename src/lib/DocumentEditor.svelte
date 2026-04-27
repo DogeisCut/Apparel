@@ -302,12 +302,13 @@
 					pointer-events="none" 
 				/>
 				<g transform="translate({editorState.position.x},{editorState.position.y}) scale({editorState.zoom})">
+					{@html document.svg.innerHTML} 
 					{#each editorState.selectedNodes as selectedNode}
 						<g stroke="var(--toolbar)" stroke-width={4/editorState.zoom}>
+							<!-- not the proper way to render the selection outline since we cant really remove the fill or other styles...-->
 							{@html selectedNode.outerHTML}
 						</g>
 					{/each}
-					{@html document.svg.innerHTML} 
 				</g>
 				<g fill="none" stroke-linecap="round" opacity="0.5">
 					<g stroke="#ffffff" stroke-width="4">
