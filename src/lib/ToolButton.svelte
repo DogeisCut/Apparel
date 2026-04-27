@@ -1,5 +1,6 @@
 <script>
     import { Tool } from "./tools/Tool.svelte";
+	import ToolLabel from "./ToolLabel.svelte";
     
     /**
      * @type {{tool: Tool, selectedTool: Tool?}}
@@ -17,26 +18,29 @@
         selectedTool = tool;
     }}
 >
-    {tool.name}
+	<ToolLabel text={tool.name}></ToolLabel>
 </button>
 
 <style>
     button {
-		border: 1px solid rgba(255, 255, 255, 0.22);
-		border-radius: 4px;
-		background: rgba(255, 255, 255, 0.14);
-		color: white;
-		font: inherit;
-		font-size: 13px;
-		cursor: pointer;
-
-        min-height: 48px;
+		display: grid;
+		place-items: center;
+		box-sizing: border-box;
+		flex: 0 0 auto;
+		width: 56px;
+		height: 48px;
+		min-height: 48px;
 		padding: 6px;
-		border-color: var(--surface-border);
+		border: 1px solid var(--surface-border);
+		border-radius: 4px;
 		background: var(--surface-white);
 		color: var(--text-strong);
+		font: inherit;
 		font-size: 12px;
 		font-weight: 500;
+		line-height: 1.15;
+		text-align: center;
+		cursor: pointer;
 	}
 
     .active {

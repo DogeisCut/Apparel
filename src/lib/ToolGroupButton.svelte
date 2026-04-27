@@ -1,24 +1,50 @@
 <script>
-    import { Tool } from "./tools/Tool.svelte";
-	import toolArrow from "$lib/assets/toolicons/toolArrow.svg";
+	import { tick } from "svelte";
+	import { Tool } from "./tools/Tool.svelte";
+	import ToolLabel from "./ToolLabel.svelte";
+	import toolArrow from "$lib/assets/toolicons/dark/toolOptionArrow.svg";
 
-    /**
-     * @type {{tools: Tool[], selectedTool: Tool?}}
-     */
-    let { tools, selectedTool = $bindable() } = $props()
+	/**
+	 * @type {{tools: Tool[], selectedTool: Tool?}}
+	 */
+	let { tools, selectedTool = $bindable() } = $props();
 
-    /**
-     * @type {Tool?}
-     */
-    let tool = $derived(tools[0] ?? null);
+	/**
+	 * @type {Tool?}
+	 */
+	let tool = $derived(tools[0] ?? null);
 
-    let selected = $derived(selectedTool ? tools.includes(selectedTool) : false)
-    let open = $state(false)
+	let selected = $derived(
+		selectedTool ? tools.includes(selectedTool) : false,
+	);
+	let open = $state(false);
+	let visibleTools = $derived(
+		tools.filter((toolOption) => toolOption !== tool),
+	);
+	/** @type {HTMLDivElement | null} */
+	let groupElement = $state(null);
+	let menuX = $state(0);
+	let menuY = $state(0);
 
-    /**
+	function updateMenuPosition() {
+		if (!groupElement) return;
+
+		const rect = groupElement.getBoundingClientRect();
+		menuX = rect.right + 4;
+		menuY = rect.top;
+	}
+
+	$effect(() => {
+		if (open) {
+			tick().then(updateMenuPosition);
+		}
+	});
+
+	/**
 	 * @param {MouseEvent} event
 	 */
 	function handleShapeButtonClick(event) {
+		// juust in ccase V
 		// if (
 		// 	event.detail >= 2 ||
 		// 	/** @type {HTMLElement} */ (event.target).closest(".arrow")
@@ -28,78 +54,88 @@
 		// }
 
 		// open = false;
-        open = !open;
+		if (open) {
+			selectedTool = tool;
+			open = false;
+		} else {
+			open = true;
+			updateMenuPosition();
+		}
 		return;
 	}
 
-    /**
-     * @param {Tool} toolOption
-     */
-    function selectShape(toolOption) {
-        tool = toolOption;
-        selectedTool = toolOption;
+	/**
+	 * @param {Tool} toolOption
+	 */
+	function selectShape(toolOption) {
+		tool = toolOption;
+		selectedTool = toolOption;
+		open = false;
 	}
 </script>
 
-<div class="group">
-    <button
-        type="button"
-        class:active={selected}
-        aria-label={tool?.name ?? "Empty Group"}
-        aria-expanded={open}
-        onclick={handleShapeButtonClick}
-    >
-        {tool?.name ?? "Empty Group"}
-        <img
-            class="arrow"
-            src={toolArrow}
-            alt=""
-            aria-hidden="true"
-        />
-    </button>
-    {#if open}
-        <div class="options" aria-label="Tool Group">
-            {#each tools as toolOption}
-                <button
-                    type="button"
-                    class="options"
-                    class:active={selectedTool === toolOption}
-                    aria-label={toolOption.name}
-                    onclick={() => selectShape(toolOption)}
-                >
-                    {toolOption.name}
-                </button>
-            {/each}
-        </div>
-    {/if}
+<div class="group" bind:this={groupElement}>
+	<button
+		type="button"
+		class:active={selected}
+		aria-label={tool?.name ?? "Empty Group"}
+		aria-expanded={open}
+		onclick={handleShapeButtonClick}
+	>
+		<ToolLabel text={tool?.name ?? "Empty Group"}></ToolLabel>
+		<img class="arrow" src={toolArrow} alt="" aria-hidden="true" />
+	</button>
+	{#if open}
+		<div
+			class="opts"
+			style:left={`${menuX}px`}
+			style:top={`${menuY}px`}
+			aria-label="Tool Group"
+		>
+			{#each visibleTools as toolOption}
+				<button
+					type="button"
+					class="opt"
+					class:active={selectedTool === toolOption}
+					aria-label={toolOption.name}
+					onclick={() => selectShape(toolOption)}
+				>
+					<ToolLabel text={toolOption.name}></ToolLabel>
+				</button>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <style>
-    button {
-		border: 1px solid rgba(255, 255, 255, 0.22);
-		border-radius: 4px;
-		background: rgba(255, 255, 255, 0.14);
-		color: white;
-		font: inherit;
-		font-size: 13px;
-		cursor: pointer;
-
-        min-height: 48px;
+	button {
+		display: grid;
+		place-items: center;
+		box-sizing: border-box;
+		flex: 0 0 auto;
+		width: 56px;
+		height: 48px;
+		min-height: 48px;
 		padding: 6px;
-		border-color: var(--surface-border);
+		border: 1px solid var(--surface-border);
+		border-radius: 4px;
 		background: var(--surface-white);
 		color: var(--text-strong);
+		font: inherit;
 		font-size: 12px;
 		font-weight: 500;
+		line-height: 1.15;
+		text-align: center;
+		cursor: pointer;
 	}
 
-    .active {
+	.active {
 		border-color: var(--toolbar-dark);
 		background: var(--toolbar);
 		color: white;
 	}
 
-    .arrow {
+	.arrow {
 		position: absolute;
 		top: 5px;
 		right: 5px;
@@ -107,7 +143,28 @@
 		height: 9px;
 	}
 
-    /* .options {
+	.opts {
+		position: fixed;
+		z-index: 2;
+		display: flex;
+		gap: 4px;
+		padding: 0;
+	}
+
+	button.opt {
+		width: 56px;
+		height: 48px;
+		background: var(--surface-white);
+		box-shadow: 0 2px 6px rgba(20, 32, 50, 0.12);
+	}
+
+	button.opt.active {
+		border-color: var(--toolbar-dark);
+		background: var(--toolbar);
+		color: white;
+	}
+
+	/* .options {
 		display: grid;
 		place-items: center;
 		width: 100%;
@@ -130,7 +187,8 @@
 		background: var(--toolbar);
 	} */
 
-    .group {
+	.group {
 		position: relative;
+		width: 56px;
 	}
 </style>

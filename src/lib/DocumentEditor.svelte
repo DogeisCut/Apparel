@@ -23,6 +23,7 @@
 	
 	import ToolButton from "./ToolButton.svelte";
 	import ToolGroupButton from "./ToolGroupButton.svelte";
+	import ToolOptions from "./tools/ToolOptions.svelte";
 
 	import FillStyleDropdown from "./FillStyleDropdown.svelte"
 	import StrokeStyleDropdown from "./StrokeStyleDropdown.svelte"
@@ -144,6 +145,12 @@
 		],
 	]);
 
+	const selectedToolWithOptions = $derived(
+		editorState.selectedTool && editorState.selectedTool.options !== ToolOptions
+			? editorState.selectedTool
+			: null
+	);
+
 	$effect(() => {
 		let previousTool = editorState.selectedTool;
 		
@@ -194,12 +201,13 @@
 			bind:blendMode={editorState.style.shape.blendMode}
 		>
 		</ShapeStyleDropdown>
-		<span class="sep"></span>
-		<div class="tool-options">
-			{#if editorState.selectedTool}
-				<editorState.selectedTool.options tool={editorState.selectedTool}></editorState.selectedTool.options>
-			{/if}
-		</div>
+		{#if selectedToolWithOptions}
+			{@const selectedTool = selectedToolWithOptions}
+			<span class="sep"></span>
+			<div class="tool-options">
+				<selectedTool.options tool={selectedTool}></selectedTool.options>
+			</div>
+		{/if}
 		<span class="sep"></span>
 		<div class="acts">
 			<button type="button">Group</button>
@@ -406,6 +414,13 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
+	}
+
+	.tool-options {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		min-width: 0;
 	}
 
 	.acts button {
