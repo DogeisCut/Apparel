@@ -27,6 +27,15 @@ export class Document {
 		svg.setAttribute('height', String(this.height));
 		svg.setAttribute('role', 'img');
 		svg.setAttribute('aria-label', this.name);
+		const testRect = document.createElementNS(SVG_NAMESPACE, 'rect');
+		testRect.width.baseVal.value = 50
+		testRect.height.baseVal.value = 50
+		testRect.x.baseVal.value = 300-25
+		testRect.y.baseVal.value = 100
+		testRect.style.fill = "#ff0000"
+		testRect.style.stroke = "#000000"
+		testRect.style.strokeWidth = "2px"
+		svg.appendChild(testRect)
 		return svg;
 	}
 

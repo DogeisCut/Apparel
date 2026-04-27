@@ -229,7 +229,7 @@
 				const direction = e.deltaY > 0 ? -1 : 1;
 				const newZoom = direction > 0 ? editorState.zoom * zoomFactor : editorState.zoom / zoomFactor;
 				
-				const clampedZoom = Math.min(Math.max(newZoom, 0.1), 8);
+				const clampedZoom = Math.min(Math.max(newZoom, 1/256), 256);
 
 				const rect = e.currentTarget.getBoundingClientRect();
 				const mouseX = e.clientX - rect.left;
@@ -265,14 +265,14 @@
 				<defs>
 					<pattern 
 						id="dark-checkerboard" 
-						width="16" 
-						height="16" 
+						width="8" 
+						height="8" 
 						patternUnits="userSpaceOnUse"
 						patternTransform="translate({editorState.position.x + document.width/2 * editorState.zoom}, {editorState.position.y + document.height/2 * editorState.zoom}) scale({editorState.zoom})"
 					>
-						<rect width="16" height="16" fill="#2a2b2e" />
-						<rect x="8" width="8" height="8" fill="#1e1e20" />
-						<rect y="8" width="8" height="8" fill="#1e1e20" />
+						<rect width="8" height="8" fill="#2a2b2e" />
+						<rect x="4" width="4" height="4" fill="#1e1e20" />
+						<rect y="4" width="4" height="4" fill="#1e1e20" />
 					</pattern>
 					<mask id="out-of-bounds-mask">
 						<rect width="100%" height="100%" fill="white" />
@@ -293,9 +293,6 @@
 						<circle r="6" cx="0" cy="0" />
 					</g>
 				</g>
-				<g transform="translate({editorState.position.x},{editorState.position.y}) scale({editorState.zoom})">
-					{@html document.svg.innerHTML} 
-				</g>
 				<rect 
 					width="100%" 
 					height="100%" 
@@ -304,6 +301,14 @@
 					mask="url(#out-of-bounds-mask)" 
 					pointer-events="none" 
 				/>
+				<g transform="translate({editorState.position.x},{editorState.position.y}) scale({editorState.zoom})">
+					{#each editorState.selectedNodes as selectedNode}
+						<g stroke="var(--toolbar)" stroke-width={4/editorState.zoom}>
+							{@html selectedNode.outerHTML}
+						</g>
+					{/each}
+					{@html document.svg.innerHTML} 
+				</g>
 				<g fill="none" stroke-linecap="round" opacity="0.5">
 					<g stroke="#ffffff" stroke-width="4">
 						<rect width={document.width*editorState.zoom} height={document.height*editorState.zoom} x={editorState.position.x} y={editorState.position.y} rx="0" ry="0" />
