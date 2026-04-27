@@ -28,6 +28,22 @@
 	import StrokeStyleDropdown from "./StrokeStyleDropdown.svelte"
 	import ShapeStyleDropdown from "./ShapeStyleDropdown.svelte"
 
+	//this is for later
+	/**
+	 * @param {PointerEvent} e
+	 */
+	function getCanvasCoordinates(e) {
+		// @ts-ignore
+		const rect = e.currentTarget.getBoundingClientRect();
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
+		
+		return {
+			x: (x - editorState.position.x) / editorState.zoom,
+			y: (y - editorState.position.y) / editorState.zoom
+		};
+	}
+
 	//TODO: make this a class so i can use jsdoc with it
 	let editorState = $state({
 		/**
@@ -40,6 +56,10 @@
 		selectedNodes: [],
 		position: {x:0,y:0},
 		zoom: 1,
+		pan: {
+			isPanning: false,
+			panStart: {x:0,y:0}
+		},
 		style: {
 			fill: {
 				color: "#734b06ff",
@@ -116,56 +136,22 @@
 			new LockTool(editorState, document),
 		],
 	]);
-	let isPanning = $state(false);
-	let panStart = $state({ x: 0, y: 0 });
 
-	/**
-     * @param {{ preventDefault: () => void; deltaY: number; currentTarget: { getBoundingClientRect: () => any; }; clientX: number; clientY: number; }} e
-     */
-	function handleWheel(e) {
-		e.preventDefault(); 
+	$effect(() => {
+		let previousTool = editorState.selectedTool;
 		
-		const zoomFactor = 1.1;
-		const direction = e.deltaY > 0 ? -1 : 1;
-		const newZoom = direction > 0 ? editorState.zoom * zoomFactor : editorState.zoom / zoomFactor;
-		
-		const clampedZoom = Math.min(Math.max(newZoom, 0.1), 8);
+		return () => {
+			if (previousTool) {
+				previousTool.onToolDeactivated();
+			}
+		};
+	});
 
-		const rect = e.currentTarget.getBoundingClientRect();
-		const mouseX = e.clientX - rect.left;
-		const mouseY = e.clientY - rect.top;
-
-		editorState.position.x = mouseX - (mouseX - editorState.position.x) * (clampedZoom / editorState.zoom);
-		editorState.position.y = mouseY - (mouseY - editorState.position.y) * (clampedZoom / editorState.zoom);
-		editorState.zoom = clampedZoom;
-	}
-
-	/**
-     * @param {{ button: number; altKey: any; clientX: number; clientY: number; }} e
-     */
-	function handlePanStart(e) {
-		if (e.button === 1 || (e.button === 0 && e.altKey)) {
-			isPanning = true;
-			panStart = {
-				x: e.clientX - editorState.position.x,
-				y: e.clientY - editorState.position.y
-			};
+	$effect(() => {
+		if (editorState.selectedTool) {
+			editorState.selectedTool.onToolActivated();
 		}
-	}
-
-	/**
-     * @param {{ clientX: number; clientY: number; }} e
-     */
-	function handlePanMove(e) {
-		if (isPanning) {
-			editorState.position.x = e.clientX - panStart.x;
-			editorState.position.y = e.clientY - panStart.y;
-		}
-	}
-
-	function handlePanEnd() {
-		isPanning = false;
-	}
+	});
 </script>
 
 <section class="ed" aria-label="Document editor">
@@ -217,11 +203,45 @@
 
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="canvas"
-			onwheel={handleWheel}
-			onpointerdown={handlePanStart}
-			onpointermove={handlePanMove}
-			onpointerup={handlePanEnd}
-			onpointerleave={handlePanEnd}
+			onwheel={(e) => {
+				if (!e.ctrlKey) return 
+				e.preventDefault(); 
+				
+				const zoomFactor = 1.1;
+				const direction = e.deltaY > 0 ? -1 : 1;
+				const newZoom = direction > 0 ? editorState.zoom * zoomFactor : editorState.zoom / zoomFactor;
+				
+				const clampedZoom = Math.min(Math.max(newZoom, 0.1), 8);
+
+				const rect = e.currentTarget.getBoundingClientRect();
+				const mouseX = e.clientX - rect.left;
+				const mouseY = e.clientY - rect.top;
+
+				editorState.position.x = mouseX - (mouseX - editorState.position.x) * (clampedZoom / editorState.zoom);
+				editorState.position.y = mouseY - (mouseY - editorState.position.y) * (clampedZoom / editorState.zoom);
+				editorState.zoom = clampedZoom;
+			}}
+			onpointerdown={(e) => {
+				if (e.button === 1) {
+					editorState.pan.isPanning = true;
+					editorState.pan.panStart = {
+						x: e.clientX - editorState.position.x,
+						y: e.clientY - editorState.position.y
+					};
+				}
+			}}
+			onpointermove={(e) => {
+				if (editorState.pan.isPanning) {
+					editorState.position.x = e.clientX - editorState.pan.panStart.x;
+					editorState.position.y = e.clientY - editorState.pan.panStart.y;
+				}
+			}}
+			onpointerup={() => {
+				editorState.pan.isPanning = false;
+			}}
+			onpointerleave={() => {
+				editorState.pan.isPanning = false;
+			}}
 		>
 			<svg class="canvasContents">
 				<defs>
