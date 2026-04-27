@@ -43,7 +43,7 @@
 	/**
 	 * @param {MouseEvent} event
 	 */
-	function handleShapeButtonClick(event) {
+	function handleToolButtonClick(event) {
 		// juust in ccase V
 		// if (
 		// 	event.detail >= 2 ||
@@ -55,19 +55,21 @@
 
 		// open = false;
 		if (open) {
-			selectedTool = tool;
 			open = false;
 		} else {
-			open = true;
-			updateMenuPosition();
+			if (selectedTool === tool) {
+				open = true;
+				updateMenuPosition();
+			}
 		}
+		selectedTool = tool;
 		return;
 	}
 
 	/**
 	 * @param {Tool} toolOption
 	 */
-	function selectShape(toolOption) {
+	function selectTool(toolOption) {
 		tool = toolOption;
 		selectedTool = toolOption;
 		open = false;
@@ -80,7 +82,7 @@
 		class:active={selected}
 		aria-label={tool?.name ?? "Empty Group"}
 		aria-expanded={open}
-		onclick={handleShapeButtonClick}
+		onclick={handleToolButtonClick}
 	>
 		<ToolLabel text={tool?.name ?? "Empty Group"}></ToolLabel>
 		<img class="arrow" src={toolArrow} alt="" aria-hidden="true" />
@@ -98,7 +100,7 @@
 					class="opt"
 					class:active={selectedTool === toolOption}
 					aria-label={toolOption.name}
-					onclick={() => selectShape(toolOption)}
+					onclick={() => selectTool(toolOption)}
 				>
 					<ToolLabel text={toolOption.name}></ToolLabel>
 				</button>
