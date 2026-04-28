@@ -59,6 +59,11 @@
 		 * @type {SVGElement[]}
 		 */
 		selectedNodes: [],
+		isDragging: false,
+		/**
+		 * @type {SVGGElement | null}
+		 */
+		contentGroup: null,
 		position: {
 			x: 0,
 			y: 0,
@@ -188,6 +193,10 @@
 
 	const dom = window.document
 
+	$effect(() => {
+		editorState.contentGroup = contentGroup ?? null
+	})
+
 	//TODO: move these into svghelper or something
 	/**
 	 * @param {number} clientX
@@ -198,11 +207,11 @@
 		if (!contentGroup) return { topLevel: null, bottomLevel: null, outline: false }
 
 		const hits = dom.elementsFromPoint(clientX, clientY)
-			.filter(el => contentGroup.contains(el) && el !== contentGroup)
+			.filter(el => contentGroup.contains(el) && el !== contentGroup && !el.closest('[data-tool-overlay="true"]'))
 
 		if (hits.length === 0) return { topLevel: null, bottomLevel: null, outline: false }
 
-		const bottomLevel = hits[0] 
+		const bottomLevel = hits.find((el) => el instanceof SVGGeometryElement) ?? hits[0]
 
 		/**
 		 * @type {Element?}
@@ -238,6 +247,26 @@
 		if (actualWidth < minHitWidth) element.style.strokeWidth = ''
 		
 		return inStroke && !element.isPointInFill(localPt)
+	}
+
+	/**
+	 * @param {PointerEvent} e
+	 */
+	function finishToolDrag(e) {
+		editorState.pan.isPanning = false
+		if (!isDragging) return
+
+		isDragging = false
+		editorState.isDragging = false
+		const target = /** @type {HTMLDivElement} */ (e.currentTarget)
+		if (target.hasPointerCapture(e.pointerId)) {
+			target.releasePointerCapture(e.pointerId)
+		}
+
+		const { x, y } = getCanvasCoordinates(e)
+		const { topLevel, bottomLevel, outline } = getHitElements(e.clientX, e.clientY)
+		//@ts-ignore
+		editorState.selectedTool?.onClickEnd(x, y, topLevel, bottomLevel, outline)
 	}
 </script>
 
@@ -343,6 +372,7 @@
 				if (e.button !== 0 || !editorState.selectedTool) return
 				e.currentTarget.setPointerCapture(e.pointerId)
 				isDragging = true
+				editorState.isDragging = true
 				const { x, y } = getCanvasCoordinates(e)
 				const { topLevel, bottomLevel, outline } = getHitElements(e.clientX, e.clientY)
 				if (!topLevel) {
@@ -384,15 +414,9 @@
 					editorState.selectedTool?.whileHoverNode(x, y, topLevel, bottomLevel, outline)
 				}
 			}}
-			onpointerup={(e) => {
-				editorState.pan.isPanning = false
-				if (e.button !== 0 || !isDragging) return
-				isDragging = false
-				const { x, y } = getCanvasCoordinates(e)
-				const { topLevel, bottomLevel, outline } = getHitElements(e.clientX, e.clientY)
-				//@ts-ignore
-				editorState.selectedTool?.onClickEnd(x, y, topLevel, bottomLevel, outline)
-			}}
+			onpointerup={finishToolDrag}
+			onpointercancel={finishToolDrag}
+			onlostpointercapture={finishToolDrag}
 			onpointerleave={() => {
 				editorState.pan.isPanning = false;
 			}}
